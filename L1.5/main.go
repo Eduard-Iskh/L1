@@ -21,7 +21,8 @@ func Write(ctx context.Context, worker *int, wg *sync.WaitGroup, ch chan int) {
 			for {
 				select {
 				case <-ctx.Done():
-					fmt.Printf("Завершение работы worker %d: получен сигнал SIGINT\n", j)
+					time.Sleep(500 * time.Millisecond)
+					fmt.Printf("Завершение работы worker %d\n", j)
 					return
 				case val, ok := <-c:
 					if !ok {
@@ -39,10 +40,15 @@ func Write(ctx context.Context, worker *int, wg *sync.WaitGroup, ch chan int) {
 
 func main() {
 	var wg sync.WaitGroup
+	n := 5
+
+	fmt.Printf("\nВремя работы программы %d(с)\n", n)
+
+	time.Sleep(500 * time.Millisecond)
 
 	roc := make(chan int)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(n)*time.Second)
 
 	defer cancel()
 
@@ -57,7 +63,7 @@ func main() {
 
 	go func() {
 		<-sigChan
-		fmt.Println("\nПолучен сигнал SIGINT, завершение работы")
+		fmt.Println("\nПрошло заданное время")
 		cancel()
 		time.Sleep(3 * time.Second)
 
@@ -68,10 +74,11 @@ inputLoop:
 		select {
 		case <-ctx.Done():
 			time.Sleep(2 * time.Second)
-			fmt.Println("Прерван ввод данных SIGINT")
+			fmt.Printf("\nРабота программы завершена через %d(с)\n", n)
 			break inputLoop
+
 		default:
-			fmt.Printf("Запись данных в канал: val = %d\n", i)
+			fmt.Printf("\nЗапись данных в канал: val = %d\n", i)
 			roc <- i
 			time.Sleep(10 * time.Millisecond)
 		}
