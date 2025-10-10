@@ -90,5 +90,6 @@ func main() {
 	ch <- 1
 	time.Sleep(2 * time.Second)
 	wg.Wait()
-	fmt.Println("main() stoped")
+	fmt.Println("Все горутины закрыты")
+	fmt.Println("Завершение работы main")
 }
